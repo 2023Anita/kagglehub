@@ -229,12 +229,12 @@ def upload_files_and_directories(
                         file_path = os.path.join(root, file)
                         zipf.write(file_path, os.path.relpath(file_path, folder))
 
-            tokens = [
+            archive_tokens = [
                 token
                 for token in [_upload_file(file_path=zip_path, item_type=item_type, quiet=quiet)]
                 if token is not None
             ]
-            return UploadDirectoryInfo(name="archive", files=tokens)
+            return UploadDirectoryInfo(name="archive", files=archive_tokens)
 
     if os.path.isfile(folder):
         root_dict = UploadDirectoryInfo(name="root")
@@ -257,11 +257,11 @@ def upload_files_and_directories(
         if files_to_upload:
             max_workers = min(MAX_PARALLEL_UPLOADS, len(files_to_upload))
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                tokens = executor.map(
+                upload_tokens = executor.map(
                     lambda item: _upload_file(file_path=item[1], item_type=item_type, quiet=quiet),
                     files_to_upload,
                 )
-                for (current_dict, _), token in zip(files_to_upload, tokens, strict=False):
+                for (current_dict, _), token in zip(files_to_upload, upload_tokens, strict=False):
                     if token:
                         current_dict.files.append(token)
 
